@@ -1,0 +1,55 @@
+mobile = {
+  isItem: false,
+  isPlayer: false,
+  isNPC: true,
+  isPet: false,
+  ownedBy: 0x00000000, // the pet's master
+  accessLevel: 0, // gm privelages ??
+  id: 0x00000000,
+  bodyType: 0x0000,
+  x: 0x0000,
+  y: 0x0000,
+  z: 0x00,
+  direction: 0x00,
+  name: '', // 30 bytes max
+  modelNumber: 0x0000,
+  skinColor: 0x0000,
+  
+  quantity: 0x0000, // item only
+  itemGraphicID: 0x0000, // same thing as modelNumber for non-item mobiles?
+  parentContainerID: 0x00000000, // item only
+  
+  hairStyle: 0x0000,
+  hairColor: 0x0000,
+  facialHairStyle: 0x0000,
+  facialHairColor: 0x0000,
+  str: 0x0000,
+  dex: 0x0000,
+  int: 0x0000,
+  curHP: 0x0000,
+  maxHP: 0x0000,
+  curStam: 0x0000,
+  maxStam: 0x0000,
+  curMana: 0x0000,
+  maxMana: 0x0000,
+  goldInPack: 0x00000000,
+  armorRating: 0x0000,
+  curWeight: 0x0000,
+  maxWeight: 0x0000,
+  sex: 0x00,
+  fame: 0x00000000,
+  karma: 0x00000000,
+  bankID: 0x00000000,
+  skills: {} // reference to a "Skills" object
+};
+
+Mobile class
+
++ Mobile
+  - Creature
+    - Player
+    - NPC
+      - Pet
+      - Monster
+      - Other
+  - Item
