@@ -1,33 +1,11 @@
+#!/usr/bin/env node
+
 var fs = require('fs')
   , path = require('path')
   , slice = [].slice;
 
 // load the string db into memory
-var sdb = fs.readFileSync('./sdb.txt.q', 'utf-8').split(/\r?\n/);
-
-// bad
-var big = function() {
-  var ints = slice.call(arguments)
-    , len = ints.length
-    , hex = ''
-    , ch;
-  
-  while (len--) {
-    ch = ints[len].toString(16);
-    if (ch.length < 2) ch = '0' + ch;
-    hex += ch;
-  }
-  
-  return parseInt('0x' + hex, 16);
-};
-
-// get int ready for parseint, bad
-var hex = function(n, l) {
-  l = (l || 2) * 2;
-  n = (+n).toString(16);
-  while (n.length < l) n = '0' + n;
-  return '0x' + n;
-};
+var sdb = fs.readFileSync('./sdb.txt.q', 'utf8').split(/\r?\n/);
 
 // lookup table for deobfuscation
 var lookup = {
@@ -101,7 +79,7 @@ var lookup = {
   0x02EE: 0x40, 0x0603: 0x40, 0x012F: 0x40, 0x2C9E: 0x40, 0x2BEF: 0x40
 };
 
-// byte code -> tokens
+// byte to token
 var tokens = {
   0x02: '(',
   0x03: ')',
@@ -150,25 +128,25 @@ var tokens = {
   0x36: 'var',      // variable declaration (scriptvar)
   0x37: 'include',  // include script
   0x38: 'extern',   // declares a c-like function prototype
-  
-  // these wont have key words associated 
+
+  // these wont have key words associated
   // with them, theyre simply bytecode markers
   0x3A: 'QUOTED_STRING',
   0x3C: 'CONSTANT_BYTE',
   0x3D: 'CONSTANT_WORD',
   0x3E: 'CONSTANT_DWORD',
   0x41: 'STRING',
-  
+
   // unused
   0x1A: '^',
-  
+
   // defined-unsupported
   0x27: 'ENDIF',
   0x29: 'ENDWHILE',
   0x2B: 'ENDFOR',
   0x2E: 'GOTO',
   0x30: 'ENDSWITCH',
-  
+
   // obfuscated-unsupported
   0x01: '',
   0x05: '',
@@ -193,102 +171,88 @@ var _tokens = {}
 })();
 
 // support for the hardcoded event arguments
-var events = { 
-  'speech': '(object speaker, string arg)',
-  'gotattacked': '(object attacker)',
-  'killedtarget': '(object attacker)',
-  'aversion': '(object target)',
-  'death': '(object attacker, object corpse)',
-  'sawdeath': '(object attacker, object victim, object corpse)',
-  'fightpulse': '(object target)',
-  'washit': '(object attacker, integer damamt)',
-  'failfood': '()',
-  'faildesire': '()',
-  'failshelter': '()',
-  'foundfood': '(object target)',
-  'founddesire': '(object target)',
-  'foundshelter': '(object target)',
-  'time': '()',
-  'creation': '()',
-  'enterrange': '(object target)',
-  'leaverange': '(object target)',
-  'loiter': '()',
-  'seekfood': '()',
-  'seekdesire': '()',
-  'seekshelter': '()',
-  'message': '(object sender, list args)',
-  'use': '(object user)',
-  'targetobj': '(object user, object usedon)',
-  'targetloc': '(object user, location usedon, integer objtype)',
-  'weather': '()',
-  'wasdropped': '(object dropper)',
-  'lookedat': '(object looker)',
-  'give': '(object giver, object givenobj)',
-  'wasgotten': '(object getter)',
-  'pathfound': '()',
-  'pathnotfound': '()',
-  'callback': '()',
-  'ishitting': '(object victim, integer damamt)',
-  'convofunc': '(object talker, string arg)',
-  'typeselected': '(object user, integer listindex, integer objtype, integer objhue)',
-  'hueselected': '(object user, integer objhue)',
-  'moon': '(integer trammelchange, integer feluccachange)',
-  'minrangeattack': '(object defender)',
-  'minrangedefend': '(object attacker)',
-  'maxrangeattack': '(object defender)',
-  'maxrangedefend': '(object attacker)',
-  'destroyed': '()',
-  'equip': '(object equippedon)',
-  'unequip': '(object unequippedfrom)',
-  'isstackableon': '(object stackon)',
-  'stackonto': '(object stackon)',
-  'multirecycle': '(integer oldtype, integer newtype)',
-  'decay': '(integer oldvalue, integer newvalue)',
-  'serverswitch': '()',
-  'ooruse': '(object user)',
-  'acquiredesire': '(object target)',
-  'logout': '()',
-  'objectloaded': '()',
-  'genericgump': '(object user, integer closeId, list selectList, list entryList)',
-  'oortargetobj': '(object user, object usedon)',
-  'pkpost': '(object killer, object killee)',
-  'textentry': '(object sender, integer button, string text)',
-  'shop': '(integer func)',
-  'stolenfrom': '(object stealer)',
-  'objaccess': '(object user, object usedon)',
-  'ishealthy': '()',
-  'online': '()',
-  'transaccountcheck': '(object target, integer transok)',
-  'transresponse': '(object target, integer transok)',
-  'canbuy': '(object buyer, object seller, integer quantity)',
-  'mobishitting': '(object victim, integer damage)',
-  'famechanged': '()',
-  'karmachanged': '()',
-  'murdercountchanged': '()'
-};
-
-// curry event arguments on
-var curry = function(str) {
-  return str.replace(/on\s+(\w+)[^{]+{[ \t]*(?=\n)/g, function($0, $1) {
-    if (!events[$1]) return $0;
-    return '/* ' + events[$1] + ' */\n' + $0;
-  });
-};
-
-// strip all comments
-var decomment = function(str) {
-  return str.replace(/\/\/[^\n]+|\/\*[\s\S]+?\*\//g, '');
+var events = {
+  speech: '(object speaker, string arg)',
+  gotattacked: '(object attacker)',
+  killedtarget: '(object attacker)',
+  aversion: '(object target)',
+  death: '(object attacker, object corpse)',
+  sawdeath: '(object attacker, object victim, object corpse)',
+  fightpulse: '(object target)',
+  washit: '(object attacker, integer damamt)',
+  failfood: '()',
+  faildesire: '()',
+  failshelter: '()',
+  foundfood: '(object target)',
+  founddesire: '(object target)',
+  foundshelter: '(object target)',
+  time: '()',
+  creation: '()',
+  enterrange: '(object target)',
+  leaverange: '(object target)',
+  loiter: '()',
+  seekfood: '()',
+  seekdesire: '()',
+  seekshelter: '()',
+  message: '(object sender, list args)',
+  use: '(object user)',
+  targetobj: '(object user, object usedon)',
+  targetloc: '(object user, location usedon, integer objtype)',
+  weather: '()',
+  wasdropped: '(object dropper)',
+  lookedat: '(object looker)',
+  give: '(object giver, object givenobj)',
+  wasgotten: '(object getter)',
+  pathfound: '()',
+  pathnotfound: '()',
+  callback: '()',
+  ishitting: '(object victim, integer damamt)',
+  convofunc: '(object talker, string arg)',
+  typeselected: '(object user, integer listindex, integer objtype, integer objhue)',
+  hueselected: '(object user, integer objhue)',
+  moon: '(integer trammelchange, integer feluccachange)',
+  minrangeattack: '(object defender)',
+  minrangedefend: '(object attacker)',
+  maxrangeattack: '(object defender)',
+  maxrangedefend: '(object attacker)',
+  destroyed: '()',
+  equip: '(object equippedon)',
+  unequip: '(object unequippedfrom)',
+  isstackableon: '(object stackon)',
+  stackonto: '(object stackon)',
+  multirecycle: '(integer oldtype, integer newtype)',
+  decay: '(integer oldvalue, integer newvalue)',
+  serverswitch: '()',
+  ooruse: '(object user)',
+  acquiredesire: '(object target)',
+  logout: '()',
+  objectloaded: '()',
+  genericgump: '(object user, integer closeId, list selectList, list entryList)',
+  oortargetobj: '(object user, object usedon)',
+  pkpost: '(object killer, object killee)',
+  textentry: '(object sender, integer button, string text)',
+  shop: '(integer func)',
+  stolenfrom: '(object stealer)',
+  objaccess: '(object user, object usedon)',
+  ishealthy: '()',
+  online: '()',
+  transaccountcheck: '(object target, integer transok)',
+  transresponse: '(object target, integer transok)',
+  canbuy: '(object buyer, object seller, integer quantity)',
+  mobishitting: '(object victim, integer damage)',
+  famechanged: '()',
+  karmachanged: '()',
+  murdercountchanged: '()'
 };
 
 // for the tokenizer
 var rules = (function() {
   var rules = {};
-  
+
   var escape = function(str) {
     return str.replace(/([+*?\-.^$(){}\\|\[\]])/g, '\\$1');
   };
-  
-  // in order of operator precedence
+
   ['(',
    ')',
    ',',
@@ -317,16 +281,37 @@ var rules = (function() {
    '^'].forEach(function(tok) {
     rules[tok] = new RegExp('^' + escape(tok));
   });
-  
+
   rules.QUOTED_STRING = /^"([^"]|\\")*"/;    // 0x3A
   rules.CONSTANT_DWORD = /^0x[a-f0-9]{8}/i;  // 0x3E
   rules.CONSTANT_WORD = /^0x[a-f0-9]{4}/i;   // 0x3D
   rules.CONSTANT_BYTE = /^0x[a-f0-9]{2}/i;   // 0x3C
   rules.STRING = /^\w+/;                     // 0x41
   rules.WHITESPACE = /^\s+/;
-  
+
   return rules;
 })();
+
+// curry event arguments on
+var curry = function(str) {
+  return str.replace(/on\s+(\w+)/g, function($0, $1) {
+    if (!events[$1]) return $0;
+    return '/* ' + events[$1] + ' */\n' + $0;
+  });
+};
+
+// strip all comments
+var decomment = function(str) {
+  return str.replace(/\/\/[^\n]+|\/\*[\s\S]+?\*\//g, '');
+};
+
+// int to hex string
+var hex = function(n, l) {
+  l = (l || 2) * 2;
+  n = (+n).toString(16);
+  while (n.length < l) n = '0' + n;
+  return '0x' + n;
+};
 
 // decompile a single file
 var decompile = function(data) {
@@ -338,24 +323,24 @@ var decompile = function(data) {
     , token
     , val
     , depth = 0;
-  
+
   // this is a huge hack to get the whitespace right
   var prev = function() {
-    var a = data[i-5], b = data[i-4]; 
-    return a && b && tokens[lookup[big(a, b)]];
+    var a = data[i-5], b = data[i-4];
+    return a && b && tokens[lookup[(a | (b << 8))]];
   };
   var peek = function() {
     var a = data[i], b = data[i+1];
-    return a && b && tokens[lookup[big(a, b)]];
+    return a && b && tokens[lookup[(a | (b << 8))]];
   };
-  
-  // whitespace: there are a few special exceptions 
+
+  // whitespace: there are a few special exceptions
   // that are handled here. specifically, "else".
-  var whitespace = function(out) { 
+  var whitespace = function(out) {
     if (token === '{') out = ' ' + out;
     else if (token === '}') out += ' ';
-    if (token === '{' 
-        || token === '}' 
+    if (token === '{'
+        || token === '}'
         || token === ';') {
       if (token === '{') depth++;
       if (peek() === '}') depth--;
@@ -363,60 +348,129 @@ var decompile = function(data) {
         out += '\n';
         out += Array(depth + 1).join('  ');
       }
-    } 
+    }
     if (ch >= 0x0C && ch <= 0x1C) out = ' ' + out + ' ';
-    else if ((ch >= 0x1D && ch <= 0x38) 
-              || token === ',') 
-                if (token !== 'else' 
+    else if ((ch >= 0x1D && ch <= 0x38)
+              || token === ',')
+                if (token !== 'else'
                     && token !== 'break') out += ' ';
     return out;
   };
-  
+
   while (i < len) {
-    // need to convert 
-    word = big(data[i++], data[i++]);
-    
+    // need to convert
+    word = data[i++] | (data[i++] << 8);
+
     // deobfuscate
     ch = lookup[word];
-    
+
     // get the readable token
     token = tokens[ch];
-    
+
     switch (token) {
       case 'STRING':
       case 'QUOTED_STRING':
-        val = big(data[i++], data[i++]);
+        val = data[i++] | (data[i++] << 8);
         out += sdb[val];
         break;
       case 'CONSTANT_BYTE':
         out += hex(data[i++], 1);
         break;
       case 'CONSTANT_WORD':
-        val = big(data[i++], data[i++]);
+        val = data[i++] | (data[i++] << 8);
         out += hex(val, 2);
         break;
-      case 'CONSTANT_DWORD': 
-        val = big(data[i++], data[i++], data[i++], data[i++]);
+      case 'CONSTANT_DWORD':
+        val = data;
+        val = val[i++] | ((val[i++] | ((val[i++] | (val[i++] << 8)) << 8)) << 8);
         out += hex(val, 4);
         break;
       default:
         out += whitespace(token);
     }
-    
+
     // HACK
-    if (prev() === 'case') {
+    if (prev() === 'case' 
+        || token === 'default') {
       out += '\n';
       out += Array(depth + 1).join('  ');
     }
-    
-    // lookbehind.unshift(token);
-    // lookbehind.pop();
   }
-  
+
   // curry on event args
   out = curry(out);
-  
+
   return out;
+};
+
+// parse and compile a 
+// string, return a buffer
+var compile = function(str) {
+  var out = new Buffer(Buffer.byteLength(str) * 3)
+    , i = 0
+    , k = 0
+    , key
+    , keys = Object.keys(rules)
+    , rule
+    , cap;
+
+  str = decomment(str);
+
+  while (str.length) {
+    key = keys[k++];
+    rule = rules[key];
+
+    if (!rule) {
+      throw new
+        SyntaxError('Unexpected token at -' + str.length);
+    }
+
+    if (cap = rule.exec(str)) {
+      k = 0;
+      cap = cap[0];
+      str = str.substring(cap.length);
+      if (key !== 'WHITESPACE') {
+        // is it a language construct?
+        // or some kind of statement?
+        if (key === 'STRING' && _tokens[cap]) {
+          key = cap;
+        }
+        val = _lookup[_tokens[key]];
+        out[i++] = val & 0xFF;
+        out[i++] = (val >> 8) & 0xFF;
+      }
+      switch (key) {
+        case 'WHITESPACE':
+          break;
+        case 'STRING':
+        case 'QUOTED_STRING':
+          val = sdb.indexOf(cap);
+          out[i++] = val & 0xFF;
+          out[i++] = (val >> 8) & 0xFF;
+          break;
+        case 'CONSTANT_BYTE':
+          val = parseInt(cap, 16);
+          out[i++] = val & 0xFF;
+          break;
+        case 'CONSTANT_WORD':
+          val = parseInt(cap, 16);
+          out[i++] = val & 0xFF;
+          out[i++] = (val >> 8) & 0xFF;
+          break;
+        case 'CONSTANT_DWORD':
+          val = parseInt(cap, 16);
+          out[i++] = val & 0xFF;
+          out[i++] = (val >> 8) & 0xFF;
+          out[i++] = (val >> 16) & 0xFF;
+          out[i++] = (val >> 24) & 0xFF;
+          break;
+        default: 
+          break;
+      }
+    }
+  }
+
+  return out.slice(0, i);
 };
 
 decompile.file = function(file) {
@@ -432,74 +486,8 @@ decompile.mass = function(root) {
   });
 };
 
-// parse and compile a string, return a buffer
-var compile = function(str) {
-  var len = str.length
-    , out = new Buffer(Buffer.byteLength(str) * 3)
-    , i = 0
-    , k = 0
-    , key
-    , keys = Object.keys(rules)
-    , rule
-    , cap;
-  
-  str = decomment(str);
-  
-  while (str.length) {
-    key = keys[k++];
-    rule = rules[key];
-    if (cap = rule.exec(str)) {
-      k = 0;
-      cap = cap[0];
-      str = str.substring(cap.length);
-      if (key !== 'WHITESPACE') {
-        if (key === 'STRING' && _tokens[cap]) {
-          key = cap;
-        }
-        val = hex(_lookup[_tokens[key]], 2);
-        val = val.substring(2);
-        val = val.match(/[a-f0-9]{2}/gi);
-        out[i++] = parseInt(val[1], 16);
-        out[i++] = parseInt(val[0], 16);
-      }
-      switch (key) {
-        case 'WHITESPACE': 
-          break;
-        case 'STRING':
-        case 'QUOTED_STRING':
-          val = hex(sdb.indexOf(cap), 2);
-          val = val.substring(2);
-          val = val.match(/[a-f0-9]{2}/gi);
-          out[i++] = parseInt(val[1], 16);
-          out[i++] = parseInt(val[0], 16);
-          break;
-        case 'CONSTANT_BYTE':
-          out[i++] = parseInt(cap, 16);
-          break;
-        case 'CONSTANT_WORD':
-          cap = cap.substring(2);
-          cap = cap.match(/[a-f0-9]{2}/gi);
-          out[i++] = parseInt(cap[1], 16);
-          out[i++] = parseInt(cap[0], 16);
-          break;
-        case 'CONSTANT_DWORD':
-          cap = cap.substring(2);
-          cap = cap.match(/[a-f0-9]{2}/gi);
-          out[i++] = parseInt(cap[3], 16);
-          out[i++] = parseInt(cap[2], 16);
-          out[i++] = parseInt(cap[1], 16);
-          out[i++] = parseInt(cap[0], 16);
-          break;
-        default: break;
-      }
-    }
-  }
-  
-  return out.slice(0, i);
-};
-
 compile.file = function(file) {
-  var out = compile(fs.readFileSync(file, 'utf-8'));
+  var out = compile(fs.readFileSync(file, 'utf8'));
   file = file.replace('.uosl', '.q');
   fs.writeFileSync(file, out);
 };
@@ -512,24 +500,23 @@ compile.mass = function(root) {
 };
 
 // # usage: ./uosl .rundir/scripts --decompile
-
 var main = function(argv) {
   var com = argv.indexOf('--compile')
     , dec = argv.indexOf('--decompile')
     , root
     , start
     , data;
-  
+
   if (!~com) com = argv.indexOf('-c');
   if (!~dec) dec = argv.indexOf('-d');
-  
+
   if (~com) argv.splice(com, 1);
   if (~dec) argv.splice(dec, 1);
-  
+
   com = !!~com;
   dec = !!~dec;
   root = argv.pop();
-  
+
   start = Date.now();
   if (com) {
     if (fs.statSync(root).isDirectory()) {
@@ -545,18 +532,17 @@ var main = function(argv) {
     }
   }
   console.log(
-    '%s completed in %sms.', 
-    com ? 'Compilation' 
-        : 'Decompilation', 
+    '%s completed in %sms.',
+    com ? 'Compilation'
+        : 'Decompilation',
     Date.now() - start
   );
 };
 
 if (!module.parent) {
   if (process.argv.indexOf('--test')) {
-    // test a file
     var data = fs.readFileSync('./build.m.q');
-    fs.writeFileSync('./mine.m.c', decompile(compile(decompile(data))));
+    fs.writeFileSync('./mine.m.uosl', decompile(compile(decompile(data))));
   } else {
     main(process.argv.slice());
   }

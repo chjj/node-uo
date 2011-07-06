@@ -1,6 +1,6 @@
-var utils = require('./utils'),
-    strToBytes = utils.strToBytes,
-    intToBytes = utils.intToBytes;
+var utils = require('./utils')
+  , strToBytes = utils.strToBytes
+  , intToBytes = utils.intToBytes;
 
 // not even close to being remotely finished
 // this is just an outline of what may come
@@ -20,23 +20,23 @@ var packets = exports.packets = {
     build: function statusBarInfo(mobile) {
       //var player = this.player;
       var base = [].concat(
-        intToBytes(mobile.id, 4),
-        strToBytes(mobile.name, 30),
-        intToBytes(mobile.curHP, 2),
-        intToBytes(mobile.maxHP, 2),
-        intToBytes(mobile.nameChangeFlag, 1), // is it a pet?
-        intToBytes(mobile.statusFlag, 1),
-        intToBytes(mobile.sex, 1), // and race?
-        intToBytes(mobile.str, 2),
-        intToBytes(mobile.dex, 2),
-        intToBytes(mobile.int, 2),
-        intToBytes(mobile.curStam, 2),
-        intToBytes(mobile.maxStam, 2),
-        intToBytes(mobile.curMana, 2),
-        intToBytes(mobile.maxMana, 2),
-        intToBytes(mobile.goldInPack, 4),
-        intToBytes(mobile.armorRating, 2),
-        intToBytes(mobile.weight, 2),
+          intToBytes(mobile.id, 4)
+        , strToBytes(mobile.name, 30)
+        , intToBytes(mobile.curHP, 2)
+        , intToBytes(mobile.maxHP, 2)
+        , intToBytes(mobile.nameChangeFlag, 1) // is it a pet?
+        , intToBytes(mobile.statusFlag, 1)
+        , intToBytes(mobile.sex, 1) // and race?
+        , intToBytes(mobile.str, 2)
+        , intToBytes(mobile.dex, 2)
+        , intToBytes(mobile.int, 2)
+        , intToBytes(mobile.curStam, 2)
+        , intToBytes(mobile.maxStam, 2)
+        , intToBytes(mobile.curMana, 2)
+        , intToBytes(mobile.maxMana, 2)
+        , intToBytes(mobile.goldInPack, 4)
+        , intToBytes(mobile.armorRating, 2)
+        , intToBytes(mobile.weight, 2)
       );
       // NEED MORE DOWN HERE
     }
@@ -46,8 +46,8 @@ var packets = exports.packets = {
     sendLength: true,
     build: function objectInfo(object) {
       var base = [].concat(
-        intToBytes(object.id, 4),
-        intToBytes(object.graphic, 2)
+          intToBytes(object.id, 4)
+        , intToBytes(object.graphic, 2)
       );
       // more down here
     }
@@ -178,16 +178,16 @@ var packets = exports.packets = {
       // END CONCAT
     }
   }
-  
-  
-  
-  
-  
+
+
+
+
+
   '0xA8': { // Server List - sent after user is authenticated
     sendLength: true,
     build: function serverList() {
       return [].concat(
-        0x5D, // system info flag -- runuo sends 0x5D 
+        0x5D, // system info flag -- runuo sends 0x5D
           // 0xCC is dont send vid card info, 0x64 is send vid card info
         0x00, 0x01, // number of servers --- 0, 0x01 ??
           // SERVERS START HERE
@@ -208,17 +208,17 @@ var packets = exports.packets = {
         cfg.hostBytes,
         //0x0A, 0x21, // port
         cfg.portBytes,
-        0x00, 0x00, 0x00, 0x00 // randomly generated key used by OSI 
+        0x00, 0x00, 0x00, 0x00 // randomly generated key used by OSI
       );
     }
   },
-  // client ver: client sends string, 
+  // client ver: client sends string,
   // server sends bytes, uosa isnt sending anything during login
-  '0xBD': { 
+  '0xBD': {
     sendLength: true,
     build: function clientVersion() {
       return [].concat(
-        0, 0, 0 
+        0, 0, 0
       );
     }
   },
@@ -254,7 +254,7 @@ var packets = exports.packets = {
         0x01, 0x90, // body type
         0x03, 0xC5, // x-loc
         0x01, 0x25, // y-loc
-        0x00, // unknown, always zero 
+        0x00, // unknown, always zero
         0x1A, // z-loc
         0x00, // facing
         0x00, 0xFF, 0xFF, 0xFF, // unknown, always zero
@@ -298,7 +298,7 @@ var packets = exports.packets = {
     sendLength: false,
     build: function seasonalInfo() {
       return [].concat(
-        0x00, // season flag 
+        0x00, // season flag
         0x01 // play sound?
       );
     }
@@ -336,7 +336,7 @@ var packets = exports.packets = {
   },
   '0x82': { // login denied
     sendLength: false,
-    build: (function() { 
+    build: (function() {
       var reasons = {
         'INCORRECT_NAME_PASS': 0x00,
         'ALREADY_IN_USE': 0x01,
@@ -347,7 +347,7 @@ var packets = exports.packets = {
         'TIME_LIMIT_MET': 0x06,
         'AUTHENTICATION_FAILURE': 0x07
       };
-      return function loginDenied(reason) { 
+      return function loginDenied(reason) {
         return [reasons[reason]];
       };
     })()
@@ -369,7 +369,7 @@ var packets = exports.packets = {
         start = start.concat(intToBytes(out.length + 3, 2));
       }
       out = new Buffer(start.concat(out));
-      return out; 
+      return out;
     };
     packet.send = function(socket) {
       socket.write(packet.create.apply(packet, arguments));

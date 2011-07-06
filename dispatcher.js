@@ -1,18 +1,18 @@
-var utils = require('./utils');
-var cfg = require('./config');
-var ServerPackets = require('./server-packet').packets;
-var data = require('./data');
-var Player = require('./object').Player;
+var utils = require('./utils')
+  , cfg = require('./config')
+  , ServerPackets = require('./server-packet').packets
+  , data = require('./data')
+  , Player = require('./object').Player;
 
 var handlers = {
   // 0x80, Login Request, maybe use names as keys?
   '0x80': function(socket, packet) { // login request
-    var name = packet.acctName; 
-    var password = packet.password; 
+    var name = packet.acctName;
+    var password = packet.password;
     var nextLoginKey = packet.nextLoginKey; // from uo.cfg ??
     console.log(
-      'Login attempt from: ' + socket.remoteAddress, 
-      '- ACCOUNT: ' + name, 
+      'Login attempt from: ' + socket.remoteAddress,
+      '- ACCOUNT: ' + name,
       '- PASS: ' + password
     );
     var account = data.accounts[name];
@@ -40,15 +40,15 @@ var handlers = {
   },
   '0x91': function(socket, packet) { // now the client is connecting to the "real" server
     var loginKey = packet.key; // doesnt really matter what this is
-    var name = packet.sid; 
+    var name = packet.sid;
     var password = packet.password;
-    
-    // now we have to authenticate AGAIN because the client 
+
+    // now we have to authenticate AGAIN because the client
     // is annoyingly set up for multiple servers
     var account = data.accounts[name];
     if (account && password === account.password) {
       console.log('Successful authentication from (2): ' + name);
-      // send character list packet here 
+      // send character list packet here
       socket.write(ServerPackets.charSelection());
       Player.authenticated(socket, account);
     } else {

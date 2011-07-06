@@ -4,9 +4,9 @@ var slice = [].slice;
 
 require('./logger');
 
-var utils = require('./utils');
-var cfg = config = require('./config');
-var ClientPacket = require('./client-packet');
+var utils = require('./utils')
+  , cfg = config = require('./config')
+  , ClientPacket = require('./client-packet');
 
 var sockets = [];
 
@@ -14,7 +14,7 @@ var server = net.createServer(function(socket) {
   socket.setNoDelay(true); // turn off the nagle algorithm
   socket.on('data', function(data) {
     // connection packet - ip address / login key
-    if (!~sockets.indexOf(socket)) { 
+    if (!~sockets.indexOf(socket)) {
       if (data.length !== 4) {
         // they were stuck in the same packet, split them up
         socket.emit('data', data.slice(0, 4)); // wont work with ipv6
@@ -25,7 +25,7 @@ var server = net.createServer(function(socket) {
       console.log('Connection from: ' + slice.call(data).join('.'));
       return;
     }
-    
+
     if (socket._waitForNext) {
       // need to concatenate the old data buffer with the new one!
       var buff = new Buffer(socket._waitForNext.length + data.length);
@@ -34,38 +34,39 @@ var server = net.createServer(function(socket) {
       data = buff; // now everything can continue as normal
       delete socket._waitForNext;
     }
-    
-    var cmd = utils.intToHexStr(data[0]), 
-        temp = ClientPacket.packets[cmd];
+
+    var cmd = utils.intToHexStr(data[0])
+      , temp = ClientPacket.packets[cmd];
+
     if (!temp) {
       console.error('Received unknown packet from client: ' + cmd);
       return;
     }
-    
+
     // if theres no size, the size is variable, check for length bytes
-    var size = temp.size || utils.bytesToInt(data.slice(1, 3)); 
-    if (data.length > size) { 
+    var size = temp.size || utils.bytesToInt(data.slice(1, 3));
+    if (data.length > size) {
       // multiple packets were sent, need to split them up
       // could check data[size] here to see if its a real command
       socket.emit('data', data.slice(0, size));
       socket.emit('data', data.slice(size));
       return;
     } else if (data.length < size) {
-      // the buffer length is smaller than the expected size, 
+      // the buffer length is smaller than the expected size,
       // the packet mustve gotten chopped off
       // need to wait for the next data event
       // this will get concatenated with the next buffer
-      socket._waitForNext = data; 
+      socket._waitForNext = data;
       return;
     }
-    
+
     // the data is for sure good now, we can translate it into a Packet object
     var packet = new ClientPacket(data, temp);
     socket.emit('packet', packet); // emit a "packet" event
   });
-  
+
   socket.on('packet', dispatch);
-  
+
   socket.on('close', function() {
     // remove the socket
     var pos = sockets.indexOf(socket);

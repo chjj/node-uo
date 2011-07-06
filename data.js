@@ -7,10 +7,10 @@ var mobiles = {
 
 // mock accounts
 var accounts = {
-  'test': { 
-    name: 'test', 
-    password: 'test', 
-    chars: ['1'] // uuid 
+  'test': {
+    name: 'test',
+    password: 'test',
+    chars: ['1'] // uuid
   }
 };
 

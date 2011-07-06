@@ -1,7 +1,7 @@
-var utils = require('./utils'),
-    bytesToStr = utils.bytesToStr,
-    bytesToInt = utils.bytesToInt,
-    intToHexStr = utils.intToHexStr;
+var utils = require('./utils')
+  , bytesToStr = utils.bytesToStr
+  , bytesToInt = utils.bytesToInt
+  , intToHexStr = utils.intToHexStr;
 
 var ClientPacket = module.exports = function(data, temp) {
   if (!(this instanceof ClientPacket)) {
@@ -65,7 +65,7 @@ ClientPacket.packets = {
       packet.pattern1 = packet.seek(4);
       packet.pattern2 = packet.seek(4);
       packet.pattern3 = packet.seek(1);
-      packet.charName = packet.seekStr(30); 
+      packet.charName = packet.seekStr(30);
       packet.unknown0 = packet.seek(2);
       packet.clientFlag = packet.seekInt(4);
       packet.unknown1 = packet.seek(4);
@@ -472,14 +472,14 @@ ClientPacket.packets = {
   },
   '0x5F': {
     name: 'Server List Add Entry',
-    size: 49, 
+    size: 49,
     handle: function(packet) {
       packet.data = packet.seek(48);
     }
   },
   '0x60': {
     name: 'Server List Remove Entry',
-    size: 5, 
+    size: 5,
     handle: function(packet) {
       packet.id = packet.seekInt(4); // entry id
     }
@@ -604,7 +604,7 @@ ClientPacket.packets = {
   },
   '0xA4': {
     name: 'Client Specs',
-    size: 149, 
+    size: 149,
     handle: function(packet) {
       packet.data = packet.seek(148);
     }
@@ -633,16 +633,16 @@ ClientPacket.packets = {
     size: 0, // variable
     handle: function(packet) {
       packet.type = packet.seekInt(1);
-      
+
       packet.color = packet.seekInt(2);
       packet.font = packet.seekInt(2);
       packet.language = packet.seekStr(4);
-      
+
       if (packet.type & 0xC0) {
         // crazy stuff here
       }
-      
-      packet.msg = packet.seekStr(packet.remaining); 
+
+      packet.msg = packet.seekStr(packet.remaining);
       // this probably wont work without figuring out the weird stuff happening above
     }
   },
@@ -707,25 +707,25 @@ ClientPacket.packets = {
       packet.osMajor = packet.seekInt(4);
       packet.osMinor = packet.seekInt(4);
       packet.osRevision = packet.seekInt(4);
-      
+
       packet.cpuManufacturer = packet.seekInt(4);
       packet.cpuFamily = packet.seekInt(4);
       packet.cpuModel = packet.seekInt(4);
       packet.cpuClockSpeed = packet.seekInt(4);
       packet.cpuQuantity = packet.seekInt(1);
-      
+
       packet.memory = packet.seekInt(4);
       packet.screenWidth = packet.seekInt(4);
       packet.screenHeight = packet.seekInt(4);
       packet.screenDepth = packet.seekInt(4);
       packet.dxVersion = packet.seekInt(2);
       packet.dxMinor = packet.seekInt(2);
-      
+
       packet.videoCard = packet.seek(76); // string?
       packet.videoCardVendorID = packet.seekInt(4);
       packet.videoCardDeviceID = packet.seekInt(4);
       packet.videoCardMemory = packet.seekInt(4);
-      
+
       packet.distribution = packet.seekInt(1);
       packet.clientsRunning = packet.seekInt(1);
       packet.clientsInstalled = packet.seekInt(1);
@@ -736,33 +736,33 @@ ClientPacket.packets = {
     }
   },
   // TODO: new school client packets: 0xE0 to 0xEF
-  
+
   // START: packets sent by both the client and server
   '0x0C': {
     name: 'Edit Tile Data', // god client
     size: 0, // variable
     handle: function(packet) {
-      packet.tileNumber = packet.seekInt(2); 
-      packet.tileDataFlags = packet.seekInt(4); 
-      packet.weight = packet.seekInt(1); 
-      packet.quality = packet.seekInt(1); 
-      packet.unknown0 = packet.seek(2); 
-      packet.unknown1 = packet.seek(1); 
-      packet.quantity = packet.seekInt(1); 
-      packet.animationFrameNumber = packet.seekInt(2); 
-      packet.unknown2 = packet.seek(1); 
-      packet.hue = packet.seekInt(1); 
-      packet.unknown3 = packet.seek(1); 
-      packet.value = packet.seekInt(1); 
-      packet.height = packet.seekInt(1); 
-      packet.itemName = packet.seekStr(20); 
+      packet.tileNumber = packet.seekInt(2);
+      packet.tileDataFlags = packet.seekInt(4);
+      packet.weight = packet.seekInt(1);
+      packet.quality = packet.seekInt(1);
+      packet.unknown0 = packet.seek(2);
+      packet.unknown1 = packet.seek(1);
+      packet.quantity = packet.seekInt(1);
+      packet.animationFrameNumber = packet.seekInt(2);
+      packet.unknown2 = packet.seek(1);
+      packet.hue = packet.seekInt(1);
+      packet.unknown3 = packet.seek(1);
+      packet.value = packet.seekInt(1);
+      packet.height = packet.seekInt(1);
+      packet.itemName = packet.seekStr(20);
     }
   },
   '0x15': {
     name: 'Follow',
     size: 9,
     handle: function(packet) {
-      packet.toFollow = packet.seekInt(4); 
+      packet.toFollow = packet.seekInt(4);
       packet.isFollowing = packet.seekInt(4);
     }
   },
@@ -836,9 +836,9 @@ ClientPacket.packets = {
       packet.pageCount = packet.seekInt(2);
       packet.pages = [];
       while (packet.remaining) {
-        page = { 
+        page = {
           number: packet.seekInt(2),
-          lines: [] 
+          lines: []
         };
         lineCount = packet.seekInt(2);
         while (lineCount--) {
@@ -877,7 +877,7 @@ ClientPacket.packets = {
       packet.containerOneID = packet.seekInt(4);
       packet.containerTwoID = packet.seekInt(4);
       packet.hasName = packet.seekInt(1);
-      if (packet.hasName) 
+      if (packet.hasName)
         packet.playerName = packet.seekStr(packet.remaining);
     }
   },
@@ -889,104 +889,104 @@ ClientPacket.packets = {
       // subcommand logic goes here
     }
   },
-  '0x72': { 
+  '0x72': {
     name: 'Request War Mode',
-    size: 5, 
+    size: 5,
     handle: function(packet) {
-      packet.flag = packet.seekInt(1); 
-      packet.unknown = packet.seek(3); 
+      packet.flag = packet.seekInt(1);
+      packet.unknown = packet.seek(3);
     }
   },
-  '0x73': { 
+  '0x73': {
     name: 'Ping Message',
-    size: 2, 
+    size: 2,
     handle: function(packet) {
-      packet.sequenceNumber = packet.seekInt(1); 
+      packet.sequenceNumber = packet.seekInt(1);
     }
   },
-  '0x93': { 
+  '0x93': {
     name: 'Old Book Header',
-    size: 99, 
+    size: 99,
     handle: function(packet) {
-      packet.bookID = packet.seekInt(4); 
-      packet.writeFlag = packet.seekInt(1); 
-      packet.unknown = packet.seek(1); 
-      packet.pageCount = packet.seekInt(2); 
-      packet.title = packet.seekStr(60); 
-      packet.author = packet.seekStr(30); 
+      packet.bookID = packet.seekInt(4);
+      packet.writeFlag = packet.seekInt(1);
+      packet.unknown = packet.seek(1);
+      packet.pageCount = packet.seekInt(2);
+      packet.title = packet.seekStr(60);
+      packet.author = packet.seekStr(30);
     }
   },
-  '0x95': { 
+  '0x95': {
     name: 'Dye Window',
-    size: 9, 
+    size: 9,
     handle: function(packet) {
-      packet.dyedItemID = packet.seekInt(4); 
-      packet.modelFromServer = packet.seekInt(2); 
-      packet.modelFromClient = packet.seekInt(2); 
+      packet.dyedItemID = packet.seekInt(4);
+      packet.modelFromServer = packet.seekInt(2);
+      packet.modelFromClient = packet.seekInt(2);
     }
   },
-  // TODO: 0x98 --- all names 3d client 
-  '0x99': { 
+  // TODO: 0x98 --- all names 3d client
+  '0x99': {
     name: 'Multi Placement View', // for houses/boats
-    size: 26, 
+    size: 26,
     handle: function(packet) {
       packet.request = packet.seekInt(1); // should be 0 from client
-      packet.deedID = packet.seekInt(4); 
-      packet.unknown0 = packet.seek(12); 
-      packet.multiModel = packet.seekInt(2); 
-      packet.unknown1 = packet.seek(6); 
+      packet.deedID = packet.seekInt(4);
+      packet.unknown0 = packet.seek(12);
+      packet.multiModel = packet.seekInt(2);
+      packet.unknown1 = packet.seek(6);
     }
   },
-  '0x9A': { 
-    name: 'Console Entry Prompt', 
+  '0x9A': {
+    name: 'Console Entry Prompt',
     size: 0, // variable
     handle: function(packet) {
       packet.id = packet.seekInt(4);
-      packet.promptID = packet.seekInt(4); 
+      packet.promptID = packet.seekInt(4);
       packet.type = packet.seekInt(4); // zero when ESC is pressed
-      packet.text = packet.seekStr(packet.remaining); 
+      packet.text = packet.seekStr(packet.remaining);
     }
   },
-  '0xB8': { 
-    name: 'Request Char Profile', 
+  '0xB8': {
+    name: 'Request Char Profile',
     size: 0, // variable
     handle: function(packet) {
       packet.mode = packet.seekInt(1);
-      packet.id = packet.seekInt(4); 
+      packet.id = packet.seekInt(4);
       // if update request
       if (packet.remaining) {
         packet.cmdType = packet.seekInt(2); // 0x0001 is update
-        packet.msglen = packet.seekInt(2); 
-        packet.newProfileText = packet.seekStr(packet.msglen); 
+        packet.msglen = packet.seekInt(2);
+        packet.newProfileText = packet.seekStr(packet.msglen);
       }
     }
   },
-  '0xBB': { 
-    name: 'Ultima Messenger', 
-    size: 9, 
+  '0xBB': {
+    name: 'Ultima Messenger',
+    size: 9,
     handle: function(packet) {
       packet.id1 = packet.seekInt(4);
-      packet.id2 = packet.seekInt(4); 
+      packet.id2 = packet.seekInt(4);
     }
   },
-  '0xBD': { 
-    name: 'Client Version', 
-    size: 0, // variable 
+  '0xBD': {
+    name: 'Client Version',
+    size: 0, // variable
     handle: function(packet) {
       packet.version = packet.seekStr(packet.size-3);
     }
   },
-  '0xBE': { 
-    name: 'Assist Version', 
-    size: 0, // variable 
+  '0xBE': {
+    name: 'Assist Version',
+    size: 0, // variable
     handle: function(packet) {
       packet.assistVersion = Array.prototype.slice.call(packet.seek(4)).join('.');
       packet.clientVersion = packet.seekStr(packet.remaining);
     }
   },
-  '0xBF': { 
-    name: 'General Information Packet', 
-    size: 0, // variable 
+  '0xBF': {
+    name: 'General Information Packet',
+    size: 0, // variable
     handle: (function() {
       // sub commands
       var sub = {
@@ -1036,31 +1036,31 @@ ClientPacket.packets = {
             default: console.error('Bad subsubcommand for party packet.');
           }
         },
-        '0x0A': function wrestlingStun(packet) { 
+        '0x0A': function wrestlingStun(packet) {
           packet.type = 'wrestleStun';
         },
         '0x0B': function clientLanguage(packet) {
           packet.type = 'clientLanguage';
           packet.lang = packet.seekStr(3);
         },
-        '0x0C': function closedStatusGump(packet) { 
+        '0x0C': function closedStatusGump(packet) {
           packet.type = 'closedStatusGump';
           packet.characterID = packet.seekInt(4);
         },
-        '0x0E': function $3dClientAction(packet) { 
+        '0x0E': function $3dClientAction(packet) {
           packet.type = '3dClientAction';
           packet.animationID = packet.seekInt(4); // need to interpret this, see reference
         },
-        '0x0F': function clientType(packet) { 
+        '0x0F': function clientType(packet) {
           packet.type = 'clientType';
           packet.seek(1); // unknown
           packet.clientTypeFlag = packet.seekInt(4);
         },
-        '0x13': function requestPopupMenu(packet) { 
+        '0x13': function requestPopupMenu(packet) {
           packet.type = 'requestPopupMenu';
           packet.characterID = packet.seekInt(4);
         },
-        '0x15': function popupEntrySelection(packet) { 
+        '0x15': function popupEntrySelection(packet) {
           packet.type = 'popupEntrySelection';
           packet.characterID = packet.seekInt(4);
           packet.entryTag = packet.seekInt(2);
@@ -1070,12 +1070,12 @@ ClientPacket.packets = {
           packet.stat = packet.seekInt(1); // str, dex, int
           packet.status = packet.seekInt(1); // up, down, locked
         },
-        '0x1C': function spellSelected(packet) { 
+        '0x1C': function spellSelected(packet) {
           packet.type = 'spellSelected';
           packet.seek(2); // unknown
           packet.selectedSpell = packet.seekInt(2);
         },
-        '0x1E': function requestHouseState(packet) { 
+        '0x1E': function requestHouseState(packet) {
           packet.type = 'requestHouseState';
           packet.houseID = packet.seekInt(4);
         },
@@ -1088,17 +1088,17 @@ ClientPacket.packets = {
           packet.itemID = packet.seekInt(4);
           packet.targetID = packet.seekInt(4);
         },
-        '0x2D': function castTargetedSpell(packet) { 
+        '0x2D': function castTargetedSpell(packet) {
           packet.type = 'castTargetedSpell';
           packet.spellID = packet.seekInt(2);
           packet.targetID = packet.seekInt(4);
         },
-        '0x2E': function useTargetedSkill(packet) { 
+        '0x2E': function useTargetedSkill(packet) {
           packet.type = 'useTargetedSkill';
           packet.skillID = packet.seekInt(2);
           packet.targetID = packet.seekInt(4);
         },
-        '0x2F': function newSchoolHouseMenuGump(packet) { 
+        '0x2F': function newSchoolHouseMenuGump(packet) {
           packet.type = 'newSchoolHouseMenuGump';
           // more sub sub command nonsense here
         },
@@ -1119,9 +1119,9 @@ ClientPacket.packets = {
       };
     })()
   },
-  '0xC2': { 
-    name: 'Unicode Text Entry', 
-    size: 0, // variable 
+  '0xC2': {
+    name: 'Unicode Text Entry',
+    size: 0, // variable
     handle: function(packet) {
       packet.playerID = packet.seekInt(4);
       packet.messageID = packet.seekInt(4);
@@ -1130,46 +1130,46 @@ ClientPacket.packets = {
       packet.text = packet.seekStr(packet.remaining);
     }
   },
-  '0xC8': { 
-    name: 'Client View Range', 
-    size: 2, 
+  '0xC8': {
+    name: 'Client View Range',
+    size: 2,
     handle: function(packet) {
       packet.range = packet.seekInt(1);
     }
   },
-  '0xC9': { 
-    name: 'Get Area Server Ping', // god client 
-    size: 6, 
+  '0xC9': {
+    name: 'Get Area Server Ping', // god client
+    size: 6,
     handle: function(packet) {
       packet.sequence = packet.seekInt(1);
       packet.tickCount = packet.seekInt(4);
     }
   },
-  '0xCA': { 
-    name: 'Get User Server Ping', // god client 
-    size: 6, 
+  '0xCA': {
+    name: 'Get User Server Ping', // god client
+    size: 6,
     handle: function(packet) {
       packet.sequence = packet.seekInt(1);
       packet.tickCount = packet.seekInt(4);
     }
   },
-  '0xD0': { 
-    name: 'Configuration File',  
+  '0xD0': {
+    name: 'Configuration File',
     size: 0, // variable
     handle: function(packet) {
       packet.type = packet.seekInt(1);
       packet.unknown = packet.seek(packet.size-4);
     }
   },
-  '0xD1': { 
-    name: 'Logout Status',  
+  '0xD1': {
+    name: 'Logout Status',
     size: 2, // might be 1 byte if sent by the client??
     handle: function(packet) {
       //packet.flag = packet.seekInt(1);
     }
   },
-  '0xD4': { 
-    name: 'New Book Header',  
+  '0xD4': {
+    name: 'New Book Header',
     size: 0, // variable
     handle: function(packet) {
       packet.bookID = packet.seekInt(4);
@@ -1182,8 +1182,8 @@ ClientPacket.packets = {
       packet.title = packet.seekStr(packet.titleLength);
     }
   },
-  '0xD6': { 
-    name: 'Mega Cliloc',  
+  '0xD6': {
+    name: 'Mega Cliloc',
     size: 0, // variable
     handle: function(packet) {
       packet.mobileIDs = [];
@@ -1193,7 +1193,7 @@ ClientPacket.packets = {
     }
   },
   '0xD7': { // UNFINISHED
-    name: 'Generic AOS Commands',  
+    name: 'Generic AOS Commands',
     size: 0, // variable
     handle: function(packet) {
       packet.playerID = packet.seekInt(4);
@@ -1201,8 +1201,8 @@ ClientPacket.packets = {
       // subcommand logic here
     }
   },
-  '0xF1': { 
-    name: 'Free Shard List',  
+  '0xF1': {
+    name: 'Free Shard List',
     size: 0, // variable
     handle: function(packet) {
       packet.subCmd = packet.seekInt(1);
