@@ -1,3 +1,7 @@
+/**
+ * Client Packets
+ */
+
 var utils = require('./utils')
   , bytesToStr = utils.bytesToStr
   , bytesToInt = utils.bytesToInt
