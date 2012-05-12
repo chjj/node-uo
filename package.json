@@ -1,0 +1,15 @@
+{
+  "name": "node-uo",
+  "description": "A UO server",
+  "author": "Christopher Jeffrey",
+  "version": "0.0.1",
+  "main": "./index.js",
+  "bin": "./bin/node-uo",
+  "preferGlobal": false,
+  "repository": "git://github.com/chjj/node-uo.git",
+  "homepage": "https://github.com/chjj/node-uo",
+  "bugs": { "url": "https://github.com/chjj/node-uo/issues" },
+  "keywords": [ "uo", "server" ],
+  "tags": [ "uo", "server" ],
+  "dependencies": {}
+}
